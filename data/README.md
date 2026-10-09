@@ -46,7 +46,7 @@ Ironport → Ashvale on the fastest available route (via Ridgepath, horse) = **3
 | sc-06 Lyra sends a message | Y3 M1 D2 08:00–08:00 (520320–520440) | Lyra | Normal |
 | sc-07 The dockmaster's ledger | Y3 M1 D2 10:00 (520560) | Daron | Normal |
 | **sc-08 MISTAKE 1** | Y3 M1 D2 08:00 (520440) | Lyra | **Double presence** |
-| **sc-09 MISTAKE 2** | Y3 M1 D2 10:00 (520560) | Daron | **Impossible travel** |
+| **sc-09 MISTAKE 2** | Y3 M1 D2 11:00 (520620) | Daron | **Impossible travel** |
 | **sc-10 MISTAKE 3** | Y3 M1 D4 08:00 (523200) | Cress | **Dead character** |
 
 ## Planted continuity mistakes
@@ -60,10 +60,10 @@ Ironport → Ashvale on the fastest available route (via Ridgepath, horse) = **3
 ### Mistake 2 — Impossible travel (sc-09)
 
 - **Rule:** Impossible travel
-- **What the data says:** Daron is in Ironport at world time 520440 (sc-05, mom-05-a), then in Ashvale at world time 520560 (sc-09, mom-09-a).
-- **Gap:** 520560 − 520440 = **120 minutes**.
+- **What the data says:** Daron is last placed in Ironport at world time 520560 (sc-07, mom-07-a), then appears in Ashvale at world time 520620 (sc-09, mom-09-a).
+- **Gap:** 520620 − 520560 = **60 minutes**.
 - **Shortest route:** Ironport → Ridgepath Pass → Ashvale on horseback = 180 + 180 = **360 minutes**. Even the fastest ship via Omel is longer.
-- **Why it's wrong:** 120 min is less than the 360 min minimum travel time between those two locations.
+- **Why it's wrong:** 60 min is less than the 360 min minimum travel time between those two locations.
 
 ### Mistake 3 — Dead character reappears (sc-10)
 
