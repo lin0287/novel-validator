@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Project } from "./types.js";
-import { checkDoublePresence, checkImpossibleTravel } from "./rules/index.js";
+import { checkDeadOrGone, checkDoublePresence, checkImpossibleTravel } from "./rules/index.js";
 import type { Issue } from "./rules/index.js";
 
 const filePath = process.argv[2] ?? "data/sample-story.json";
@@ -10,6 +10,7 @@ const story = JSON.parse(readFileSync(resolve(filePath), "utf-8")) as Project;
 const issues: Issue[] = [
   ...checkDoublePresence(story),
   ...checkImpossibleTravel(story),
+  ...checkDeadOrGone(story),
 ];
 
 if (issues.length === 0) {
