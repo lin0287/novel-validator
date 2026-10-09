@@ -89,6 +89,58 @@ export default function App() {
     setSelection({ kind: "profile", profileKind: kind, entityId: id });
   }, [project]);
 
+  const handleAddChapter = useCallback(() => {
+    const id = `ch-${uid()}`;
+    setProject((prev) => {
+      const order = prev.chapters.length + 1;
+      const newChapter: import("@engine/types.js").Chapter = {
+        id,
+        projectId: prev.id,
+        order,
+        scenes: [],
+      };
+      return { ...prev, chapters: [...prev.chapters, newChapter] };
+    });
+  }, []);
+
+  const handleAddScene = useCallback((chapterId: string) => {
+    const id = `sc-${uid()}`;
+    setProject((prev) => ({
+      ...prev,
+      chapters: prev.chapters.map((ch) => {
+        if (ch.id !== chapterId) return ch;
+        const order = ch.scenes.length + 1;
+        const newScene: import("@engine/types.js").Scene = { id, chapterId, order, moments: [] };
+        return { ...ch, scenes: [...ch.scenes, newScene] };
+      }),
+    }));
+    setSelection({ kind: "scene", sceneId: id });
+  }, []);
+
+  const handleRenameChapter = useCallback((chapterId: string, title: string) => {
+    setProject((prev) => ({
+      ...prev,
+      chapters: prev.chapters.map((ch) => {
+        if (ch.id !== chapterId) return ch;
+        const { title: _t, ...rest } = ch;
+        return title ? { ...rest, title } : rest;
+      }),
+    }));
+  }, []);
+
+  const handleDeleteScene = useCallback((sceneId: string) => {
+    setProject((prev) => ({
+      ...prev,
+      chapters: prev.chapters.map((ch) => ({
+        ...ch,
+        scenes: ch.scenes.filter((s) => s.id !== sceneId),
+      })),
+    }));
+    if (selection?.kind === "scene" && selection.sceneId === sceneId) {
+      setSelection(null);
+    }
+  }, [selection]);
+
   const handleDeleteProfile = useCallback((kind: ProfileKind, id: string) => {
     let updated: Project;
     if (kind === "character") {
@@ -124,6 +176,10 @@ export default function App() {
         }
         onCreateProfile={handleCreateProfile}
         onDeleteProfile={handleDeleteProfile}
+        onAddChapter={handleAddChapter}
+        onAddScene={handleAddScene}
+        onDeleteScene={handleDeleteScene}
+        onRenameChapter={handleRenameChapter}
       />
 
       <main className="app-editor">

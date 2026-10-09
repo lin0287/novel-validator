@@ -12,6 +12,10 @@ interface Props {
   onSelectProfile: (kind: ProfileKind, id: string) => void;
   onCreateProfile: (kind: ProfileKind) => void;
   onDeleteProfile: (kind: ProfileKind, id: string) => void;
+  onAddChapter: () => void;
+  onAddScene: (chapterId: string) => void;
+  onDeleteScene: (sceneId: string) => void;
+  onRenameChapter: (chapterId: string, title: string) => void;
 }
 
 const PROFILE_SECTIONS: { kind: ProfileKind; label: string }[] = [
@@ -28,6 +32,10 @@ export default function Sidebar({
   onSelectProfile,
   onCreateProfile,
   onDeleteProfile,
+  onAddChapter,
+  onAddScene,
+  onDeleteScene,
+  onRenameChapter,
 }: Props) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
@@ -64,27 +72,60 @@ export default function Sidebar({
 
       {/* Chapters & scenes */}
       <nav className="sidebar-nav">
-        <div className="sidebar-section-label">Manuscript</div>
+        <div className="sidebar-section-label">
+          Manuscript
+          <button
+            className="profile-add-btn"
+            onClick={onAddChapter}
+            title="Add chapter"
+          >
+            +
+          </button>
+        </div>
         {project.chapters.map((ch) => (
           <div key={ch.id} className="chapter">
             <div className="chapter-label">
-              Ch. {ch.order} · {ch.title ?? "Untitled"}
+              <span className="chapter-num">Ch. {ch.order}</span>
+              <input
+                className="chapter-title-input"
+                value={ch.title ?? ""}
+                placeholder="Untitled"
+                onChange={(e) => onRenameChapter(ch.id, e.target.value)}
+              />
+              <button
+                className="profile-add-btn"
+                onClick={() => onAddScene(ch.id)}
+                title="Add scene"
+              >
+                +
+              </button>
             </div>
             {ch.scenes.map((sc) => {
               const errs = errorCount(sc.id);
               const warns = warnCount(sc.id);
               return (
-                <button
+                <div
                   key={sc.id}
                   className={`scene-item${sc.id === selectedSceneId ? " active" : ""}`}
-                  onClick={() => onSelectScene(sc.id)}
                 >
-                  <span className="scene-title">{sc.title ?? `Scene ${sc.order}`}</span>
-                  <span className="scene-badges">
-                    {errs > 0 && <span className="badge error">{errs}</span>}
-                    {warns > 0 && <span className="badge warn">{warns}</span>}
-                  </span>
-                </button>
+                  <button
+                    className="scene-item-label"
+                    onClick={() => onSelectScene(sc.id)}
+                  >
+                    <span className="scene-title">{sc.title ?? `Scene ${sc.order}`}</span>
+                    <span className="scene-badges">
+                      {errs > 0 && <span className="badge error">{errs}</span>}
+                      {warns > 0 && <span className="badge warn">{warns}</span>}
+                    </span>
+                  </button>
+                  <button
+                    className="profile-item-delete"
+                    onClick={() => onDeleteScene(sc.id)}
+                    title="Delete scene"
+                  >
+                    ×
+                  </button>
+                </div>
               );
             })}
           </div>
