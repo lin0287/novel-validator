@@ -72,8 +72,8 @@ describe("checkImpossibleTravel", () => {
   it("message includes gap and minimum travel time", () => {
     const issues = checkImpossibleTravel(story);
     const msg = issues[0]?.message ?? "";
-    expect(msg).toContain("60 min");
-    expect(msg).toContain("360 min");
+    expect(msg).toContain("1 hour");
+    expect(msg).toContain("6 hours");
   });
 
   it("produces no issues for Lyra or Cress", () => {

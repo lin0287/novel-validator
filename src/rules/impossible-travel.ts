@@ -1,6 +1,7 @@
 import type { LocationId, Project, Route } from "../types.js";
 import { buildCharacterAppearances } from "./collect-appearances.js";
 import type { Issue } from "./issue.js";
+import { formatDuration } from "../world-time.js";
 
 /**
  * Dijkstra over the route graph, using the fastest available travel mode on
@@ -80,7 +81,7 @@ export function checkImpossibleTravel(project: Project): Issue[] {
       issues.push({
         rule: "impossible-travel",
         severity: "error",
-        message: `${charNameById.get(charId) ?? charId} travels ${fromName} → ${toName} in ${gap} min but the fastest route takes ${minTravel} min`,
+        message: `${charNameById.get(charId) ?? charId} travels ${fromName} → ${toName} in ${formatDuration(gap, project.calendar)} but the fastest route takes ${formatDuration(minTravel, project.calendar)}`,
         characterId: charId,
         sceneIds: [...new Set([a.sceneId, b.sceneId])],
         momentIds: [a.momentId, b.momentId],

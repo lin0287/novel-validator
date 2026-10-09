@@ -1,6 +1,7 @@
 import type { CharacterId, MomentId, Project, SceneId, WorldTime } from "../types.js";
 import { buildCharacterAppearances } from "./collect-appearances.js";
 import type { Issue } from "./issue.js";
+import { fromWorldTime, formatWorldDate } from "../world-time.js";
 
 interface DeathRecord {
   worldTime: WorldTime;
@@ -70,10 +71,12 @@ export function checkDeadOrGone(project: Project): Issue[] {
       const flags = sceneFlags.get(a.sceneId);
       if (flags?.flashback || flags?.dream) continue;
 
+      const appearDate = formatWorldDate(fromWorldTime(a.worldTime, project.calendar), project.calendar);
+      const deathDate = formatWorldDate(fromWorldTime(death.worldTime, project.calendar), project.calendar);
       issues.push({
         rule: "dead-or-gone",
         severity: "error",
-        message: `${charNameById.get(charId) ?? charId} appears at world time ${a.worldTime} but died at ${death.worldTime}`,
+        message: `${charNameById.get(charId) ?? charId} appears at ${appearDate} but died at ${deathDate}`,
         characterId: charId,
         sceneIds: [death.sceneId, a.sceneId],
         momentIds: [death.momentId, a.momentId],

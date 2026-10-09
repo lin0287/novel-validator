@@ -243,32 +243,110 @@ select {
   padding-right: 28px;
 }
 
-.char-grid {
+.char-picker {
+  position: relative;
+  width: 100%;
+}
+
+.char-picker-field {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  padding-top: 4px;
-}
-
-.char-check {
-  display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  user-select: none;
+  gap: 5px;
+  padding: 5px 8px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: text;
+  min-height: 34px;
+  transition: border-color 0.15s;
 }
 
-.char-check:hover {
+.char-picker:focus-within .char-picker-field {
+  border-color: var(--accent);
+}
+
+.char-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-radius: 4px;
+  padding: 2px 6px 2px 7px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.char-chip-remove {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  opacity: 0.6;
+  transition: opacity 0.1s;
+}
+
+.char-chip-remove:hover {
+  opacity: 1;
+}
+
+input.char-picker-input {
+  flex: 1;
+  min-width: 80px;
+  background: transparent;
+  border: none;
+  padding: 1px 2px;
+  width: auto;
+  font-size: 13px;
   color: var(--text-primary);
 }
 
-.char-check input[type="checkbox"] {
-  width: 14px;
-  height: 14px;
-  accent-color: var(--accent);
+input.char-picker-input:focus {
+  border-color: transparent;
+}
+
+input.char-picker-input::placeholder {
+  color: var(--text-dim);
+}
+
+.char-picker-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.char-picker-option {
+  display: block;
+  width: 100%;
+  padding: 7px 12px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-family: inherit;
+  text-align: left;
   cursor: pointer;
+  transition: background 0.1s;
+}
+
+.char-picker-option:hover,
+.char-picker-option.active {
+  background: var(--accent-dim);
+  color: var(--text-primary);
 }
 
 .time-inputs {

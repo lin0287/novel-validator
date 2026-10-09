@@ -77,3 +77,22 @@ export function formatWorldDate(date: WorldDate, cal: CalendarDef): string {
 export function minutesBetween(a: WorldTime, b: WorldTime): number {
   return Math.abs(b - a);
 }
+
+/**
+ * Format a duration in minutes as a human-readable string, using the calendar's
+ * minutesPerDay so fantasy day lengths work correctly.
+ * Examples: "6 hours", "2 days 6 hours", "1 day 0 hours 30 min"
+ */
+export function formatDuration(minutes: number, cal: CalendarDef): string {
+  const mpd = cal.minutesPerDay;
+  const days = Math.floor(minutes / mpd);
+  const remainder = minutes % mpd;
+  const hours = Math.floor(remainder / 60);
+  const mins = remainder % 60;
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days} day${days !== 1 ? "s" : ""}`);
+  if (hours > 0 || days > 0) parts.push(`${hours} hour${hours !== 1 ? "s" : ""}`);
+  if (mins > 0 || parts.length === 0) parts.push(`${mins} min`);
+  return parts.join(" ");
+}

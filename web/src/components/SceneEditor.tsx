@@ -6,6 +6,7 @@ import tippy, { type Instance } from "tippy.js";
 import type { Project, Scene, Moment } from "@engine/types.js";
 import { fromWorldTime, toWorldTime, formatWorldDate } from "@engine/world-time.js";
 import MentionList, { type MentionItem, type MentionListRef } from "./MentionList";
+import CharacterPicker from "./CharacterPicker";
 
 interface Props {
   scene: Scene;
@@ -61,17 +62,6 @@ export default function SceneEditor({ scene, project, sceneText, onSceneChange, 
       updatePrimaryMoment({ worldTime: toWorldTime(newDate, project.calendar) });
     },
     [worldDate, project.calendar, updatePrimaryMoment],
-  );
-
-  const handleCharToggle = useCallback(
-    (charId: string, checked: boolean) => {
-      const current = primaryMoment.characterIds;
-      const next = checked
-        ? [...new Set([...current, charId])]
-        : current.filter((id) => id !== charId);
-      updatePrimaryMoment({ characterIds: next });
-    },
-    [primaryMoment.characterIds, updatePrimaryMoment],
   );
 
   const mentionExtension = useMemo(() => {
@@ -185,18 +175,11 @@ export default function SceneEditor({ scene, project, sceneText, onSceneChange, 
         {/* Characters */}
         <div className="meta-row">
           <label>Characters</label>
-          <div className="char-grid">
-            {project.characters.map((c) => (
-              <label key={c.id} className="char-check">
-                <input
-                  type="checkbox"
-                  checked={primaryMoment.characterIds.includes(c.id)}
-                  onChange={(e) => handleCharToggle(c.id, e.target.checked)}
-                />
-                {c.name}
-              </label>
-            ))}
-          </div>
+          <CharacterPicker
+            characters={project.characters}
+            selectedIds={primaryMoment.characterIds}
+            onChange={(ids) => updatePrimaryMoment({ characterIds: ids })}
+          />
         </div>
 
         {/* World time */}
