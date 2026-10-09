@@ -5,6 +5,7 @@
   "description": "Scene-based novel writing app with a continuity checker",
   "type": "module",
   "scripts": {
+    "dev": "npm --prefix web run dev",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
