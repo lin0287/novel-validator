@@ -3,10 +3,18 @@ import { useEditor, EditorContent, ReactRenderer } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Mention from "@tiptap/extension-mention";
 import tippy, { type Instance } from "tippy.js";
-import type { Project, Scene, Moment } from "@engine/types.js";
+import type { Project, Scene, Moment, ItemEvent, ItemEventKind } from "@engine/types.js";
 import { fromWorldTime, toWorldTime, formatWorldDate } from "@engine/world-time.js";
 import MentionList, { type MentionItem, type MentionListRef } from "./MentionList";
 import CharacterPicker from "./CharacterPicker";
+
+const ITEM_EVENT_LABELS: Record<ItemEventKind, string> = {
+  acquired: "Acquired",
+  used: "Used",
+  lost: "Lost",
+  destroyed: "Destroyed",
+  given: "Given to",
+};
 
 interface Props {
   scene: Scene;
@@ -266,6 +274,90 @@ export default function SceneEditor({ scene, project, sceneText, onSceneChange, 
             </label>
           </div>
         </div>
+
+        {/* Item events */}
+        {project.items.length > 0 && (
+          <div className="meta-row meta-row-tall">
+            <label>Item events</label>
+            <div className="item-events">
+              {(primaryMoment.itemEvents ?? []).map((ev, idx) => (
+                <div key={idx} className="item-event-row">
+                  <select
+                    value={ev.kind}
+                    onChange={(e) => {
+                      const updated = (primaryMoment.itemEvents ?? []).map((x, i) =>
+                        i === idx ? { ...x, kind: e.target.value as ItemEventKind } : x,
+                      );
+                      updatePrimaryMoment({ itemEvents: updated });
+                    }}
+                  >
+                    {(Object.keys(ITEM_EVENT_LABELS) as ItemEventKind[]).map((k) => (
+                      <option key={k} value={k}>{ITEM_EVENT_LABELS[k]}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={ev.itemId}
+                    onChange={(e) => {
+                      const updated = (primaryMoment.itemEvents ?? []).map((x, i) =>
+                        i === idx ? { ...x, itemId: e.target.value } : x,
+                      );
+                      updatePrimaryMoment({ itemEvents: updated });
+                    }}
+                  >
+                    {project.items.map((it) => (
+                      <option key={it.id} value={it.id}>{it.name}</option>
+                    ))}
+                  </select>
+                  {ev.kind === "given" && (
+                    <select
+                      value={ev.targetCharacterId ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const updated = (primaryMoment.itemEvents ?? []).map((x, i) => {
+                          if (i !== idx) return x;
+                          const next = { ...x };
+                          if (val) next.targetCharacterId = val;
+                          else delete next.targetCharacterId;
+                          return next;
+                        });
+                        updatePrimaryMoment({ itemEvents: updated });
+                      }}
+                    >
+                      <option value="">— recipient —</option>
+                      {project.characters.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  )}
+                  <button
+                    className="item-event-remove"
+                    onClick={() => {
+                      const updated = (primaryMoment.itemEvents ?? []).filter((_, i) => i !== idx);
+                      updatePrimaryMoment({ itemEvents: updated });
+                    }}
+                    title="Remove event"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <button
+                className="item-event-add"
+                onClick={() => {
+                  const newEv: ItemEvent = {
+                    kind: "used",
+                    itemId: project.items[0]?.id ?? "",
+                  };
+                  updatePrimaryMoment({
+                    itemEvents: [...(primaryMoment.itemEvents ?? []), newEv],
+                  });
+                }}
+              >
+                + Add item event
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Prose */}

@@ -11,6 +11,8 @@ export interface Character {
   id: CharacterId;
   name: string;
   aliases?: string[];
+  description?: string;
+  notes?: string;
 }
 
 export interface Location {
@@ -18,6 +20,28 @@ export interface Location {
   name: string;
   /** Parent location id for nesting (region > town > room). */
   parentId?: LocationId;
+  description?: string;
+  notes?: string;
+}
+
+export type ItemKind = "item" | "equipment";
+
+export interface Item {
+  id: ItemId;
+  name: string;
+  description?: string;
+  kind: ItemKind;
+  /** Character who starts with the item before any scene begins. */
+  initialOwnerId?: CharacterId;
+}
+
+export type ItemEventKind = "acquired" | "used" | "lost" | "destroyed" | "given";
+
+export interface ItemEvent {
+  kind: ItemEventKind;
+  itemId: ItemId;
+  /** For 'given': the character receiving the item. */
+  targetCharacterId?: CharacterId;
 }
 
 export type TravelMode = "foot" | "horse" | "ship";
@@ -60,6 +84,8 @@ export interface Moment {
   /** Characters present at this moment. */
   characterIds: CharacterId[];
   events?: Event[];
+  /** Item state changes that occur at this moment. */
+  itemEvents?: ItemEvent[];
   /** Prose position (character offset) if anchored to scene text. */
   proseOffset?: number;
 }
@@ -98,6 +124,7 @@ export interface Project {
   title: string;
   characters: Character[];
   locations: Location[];
+  items: Item[];
   routes: Route[];
   chapters: Chapter[];
   calendar: CalendarDef;

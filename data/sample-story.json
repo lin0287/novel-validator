@@ -7,15 +7,62 @@
     "minutesPerDay": 1440
   },
   "characters": [
-    { "id": "char-lyra",  "name": "Lyra Ashfen",  "aliases": ["Lyra"] },
-    { "id": "char-daron", "name": "Daron Velt",   "aliases": ["Daron"] },
-    { "id": "char-cress", "name": "Cress of Omel","aliases": ["Cress"] }
+    {
+      "id": "char-lyra",
+      "name": "Lyra Ashfen",
+      "aliases": ["Lyra"],
+      "description": "A scholar-turned-courier from Ashvale, sharp-eyed and rarely without ink on her fingers.",
+      "notes": "Lyra carries a coded ledger she refuses to discuss. She is left-handed."
+    },
+    {
+      "id": "char-daron",
+      "name": "Daron Velt",
+      "aliases": ["Daron"],
+      "description": "A veteran sell-sword hired to escort Lyra northward. Carries his father's blade.",
+      "notes": "Daron is wanted in Ironport under a false name. He speaks very little of his past."
+    },
+    {
+      "id": "char-cress",
+      "name": "Cress of Omel",
+      "aliases": ["Cress"],
+      "description": "A trader from the port city of Omel with connections on both sides of the law.",
+      "notes": "Cress knows far more about Lyra's errand than he lets on."
+    }
   ],
   "locations": [
-    { "id": "loc-ashvale",  "name": "Ashvale" },
-    { "id": "loc-ironport", "name": "Ironport" },
-    { "id": "loc-ridgepath","name": "Ridgepath Pass" },
-    { "id": "loc-omel",     "name": "Omel" }
+    {
+      "id": "loc-ashvale",
+      "name": "Ashvale",
+      "description": "A mid-size market town on the southern plains, known for its dye trade.",
+      "notes": "The governor's manor sits on the western hill; the dye warehouses line the riverbank."
+    },
+    {
+      "id": "loc-ironport",
+      "name": "Ironport",
+      "description": "A fortified harbour on the northern coast, heavy with merchant traffic.",
+      "notes": "Ironport's garrison is loyal to the Trade Council, not the Crown."
+    },
+    {
+      "id": "loc-ridgepath",
+      "name": "Ridgepath Pass",
+      "description": "A narrow mountain crossing notorious for bandit ambushes.",
+      "notes": "The pass is impassable by ship; foot or horse only."
+    },
+    {
+      "id": "loc-omel",
+      "name": "Omel",
+      "description": "A sprawling port city on the eastern sea, seat of the trade guilds.",
+      "notes": "The Omel guild masters have a standing bounty on any Crown courier."
+    }
+  ],
+  "items": [
+    {
+      "id": "item-daronsword",
+      "name": "Daron's Blade",
+      "description": "A worn iron longsword etched with the Velt family crest. Carries the weight of a dead father's memory.",
+      "kind": "equipment",
+      "initialOwnerId": "char-daron"
+    }
   ],
   "routes": [
     { "fromId": "loc-ashvale",  "toId": "loc-ridgepath", "travelTime": { "foot": 480,  "horse": 180 } },
@@ -145,6 +192,13 @@
                   "sceneId": "sc-04",
                   "note": "Cress is slain in the ambush"
                 }
+              ],
+              "itemEvents": [
+                {
+                  "kind": "destroyed",
+                  "itemId": "item-daronsword",
+                  "note": "The blade shatters against a bandit's armour during the ambush"
+                }
               ]
             }
           ]
@@ -250,7 +304,13 @@
               "sceneId": "sc-10",
               "worldTime": 523200,
               "locationId": "loc-omel",
-              "characterIds": ["char-cress"]
+              "characterIds": ["char-cress"],
+              "itemEvents": [
+                {
+                  "kind": "used",
+                  "itemId": "item-daronsword"
+                }
+              ]
             }
           ]
         }
