@@ -7,7 +7,12 @@ const TEXTS_KEY = "novel-validator-texts";
 export function loadProject(): Project {
   try {
     const stored = localStorage.getItem(PROJECT_KEY);
-    if (stored) return JSON.parse(stored) as Project;
+    if (stored) {
+      const p = JSON.parse(stored) as Project;
+      // Migrate data saved before the items field existed
+      if (!p.items) p.items = [];
+      return p;
+    }
   } catch {
     // ignore parse errors — fall through to default
   }

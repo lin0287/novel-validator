@@ -83,4 +83,195 @@ describe("checkDoublePresence", () => {
     };
     expect(checkDoublePresence(clean)).toHaveLength(0);
   });
+
+  it("returns no issues for an empty project", () => {
+    const empty: Project = { ...story, chapters: [] };
+    expect(checkDoublePresence(empty)).toHaveLength(0);
+  });
+
+  it("does not flag same character at same time in the same location", () => {
+    // Two moments in the same scene: identical worldTime AND same location → no issue
+    const sameLocation: Project = {
+      ...story,
+      chapters: [
+        {
+          id: "ch-x",
+          projectId: story.id,
+          order: 1,
+          scenes: [
+            {
+              id: "sc-x",
+              chapterId: "ch-x",
+              order: 1,
+              moments: [
+                {
+                  id: "mom-x-a",
+                  sceneId: "sc-x",
+                  worldTime: 1000,
+                  locationId: "loc-ashvale",
+                  characterIds: ["char-lyra"],
+                },
+                {
+                  id: "mom-x-b",
+                  sceneId: "sc-x",
+                  worldTime: 1000, // same time
+                  locationId: "loc-ashvale", // same location
+                  characterIds: ["char-lyra"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    expect(checkDoublePresence(sameLocation)).toHaveLength(0);
+  });
+
+  it("flags a character appearing in three different locations at the same time as one issue", () => {
+    const threeLocations: Project = {
+      ...story,
+      chapters: [
+        {
+          id: "ch-x",
+          projectId: story.id,
+          order: 1,
+          scenes: [
+            {
+              id: "sc-x1",
+              chapterId: "ch-x",
+              order: 1,
+              moments: [
+                {
+                  id: "mom-x1",
+                  sceneId: "sc-x1",
+                  worldTime: 1000,
+                  locationId: "loc-ashvale",
+                  characterIds: ["char-lyra"],
+                },
+              ],
+            },
+            {
+              id: "sc-x2",
+              chapterId: "ch-x",
+              order: 2,
+              moments: [
+                {
+                  id: "mom-x2",
+                  sceneId: "sc-x2",
+                  worldTime: 1000,
+                  locationId: "loc-ironport",
+                  characterIds: ["char-lyra"],
+                },
+              ],
+            },
+            {
+              id: "sc-x3",
+              chapterId: "ch-x",
+              order: 3,
+              moments: [
+                {
+                  id: "mom-x3",
+                  sceneId: "sc-x3",
+                  worldTime: 1000,
+                  locationId: "loc-omel",
+                  characterIds: ["char-lyra"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const issues = checkDoublePresence(threeLocations);
+    // One issue per (character, worldTime) group — three locations still = one issue
+    expect(issues).toHaveLength(1);
+    expect(issues[0]?.characterId).toBe("char-lyra");
+    expect(issues[0]?.message).toContain("3 locations");
+  });
+
+  it("flags each character independently when multiple have double presence", () => {
+    const multiChar: Project = {
+      ...story,
+      chapters: [
+        {
+          id: "ch-x",
+          projectId: story.id,
+          order: 1,
+          scenes: [
+            {
+              id: "sc-x1",
+              chapterId: "ch-x",
+              order: 1,
+              moments: [
+                {
+                  id: "mom-x1",
+                  sceneId: "sc-x1",
+                  worldTime: 1000,
+                  locationId: "loc-ashvale",
+                  characterIds: ["char-lyra", "char-daron"],
+                },
+              ],
+            },
+            {
+              id: "sc-x2",
+              chapterId: "ch-x",
+              order: 2,
+              moments: [
+                {
+                  id: "mom-x2",
+                  sceneId: "sc-x2",
+                  worldTime: 1000,
+                  locationId: "loc-ironport",
+                  characterIds: ["char-lyra", "char-daron"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const issues = checkDoublePresence(multiChar);
+    expect(issues).toHaveLength(2);
+    const charIds = new Set(issues.map((i) => i.characterId));
+    expect(charIds).toContain("char-lyra");
+    expect(charIds).toContain("char-daron");
+  });
+
+  it("two characters at same time in different locations does not cross-flag them", () => {
+    // Lyra in Ashvale at t=1000, Daron in Ironport at t=1000 — no issue for either
+    const differentChars: Project = {
+      ...story,
+      chapters: [
+        {
+          id: "ch-x",
+          projectId: story.id,
+          order: 1,
+          scenes: [
+            {
+              id: "sc-x",
+              chapterId: "ch-x",
+              order: 1,
+              moments: [
+                {
+                  id: "mom-x",
+                  sceneId: "sc-x",
+                  worldTime: 1000,
+                  locationId: "loc-ashvale",
+                  characterIds: ["char-lyra"],
+                },
+                {
+                  id: "mom-y",
+                  sceneId: "sc-x",
+                  worldTime: 1000,
+                  locationId: "loc-ironport",
+                  characterIds: ["char-daron"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    expect(checkDoublePresence(differentChars)).toHaveLength(0);
+  });
 });

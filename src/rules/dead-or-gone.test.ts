@@ -90,4 +90,247 @@ describe("checkDeadOrGone", () => {
     const ghostMoments = issues.map((i) => i.momentIds[1]);
     expect(ghostMoments).not.toContain("mom-04-b");
   });
+
+  it("does not flag an appearance at exactly the same worldTime as the death", () => {
+    const exactBoundary: Project = {
+      ...story,
+      chapters: [
+        {
+          id: "ch-x",
+          projectId: story.id,
+          order: 1,
+          scenes: [
+            {
+              id: "sc-death",
+              chapterId: "ch-x",
+              order: 1,
+              moments: [
+                {
+                  id: "mom-death",
+                  sceneId: "sc-death",
+                  worldTime: 1000,
+                  locationId: "loc-ashvale",
+                  characterIds: ["char-cress"],
+                  events: [
+                    { type: "DEATH", entityId: "char-cress", worldTime: 1000, sceneId: "sc-death" },
+                  ],
+                },
+              ],
+            },
+            {
+              id: "sc-after",
+              chapterId: "ch-x",
+              order: 2,
+              moments: [
+                {
+                  id: "mom-after",
+                  sceneId: "sc-after",
+                  worldTime: 1000, // same minute as death — should NOT be flagged
+                  locationId: "loc-ashvale",
+                  characterIds: ["char-cress"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    expect(checkDeadOrGone(exactBoundary)).toHaveLength(0);
+  });
+
+  it("uses the earliest DEATH when a character has two death events", () => {
+    // Two death events at t=1000 and t=2000; only appearances after t=1000 should flag
+    const twoDeaths: Project = {
+      ...story,
+      chapters: [
+        {
+          id: "ch-x",
+          projectId: story.id,
+          order: 1,
+          scenes: [
+            {
+              id: "sc-death1",
+              chapterId: "ch-x",
+              order: 1,
+              moments: [
+                {
+                  id: "mom-d1",
+                  sceneId: "sc-death1",
+                  worldTime: 1000,
+                  locationId: "loc-ashvale",
+                  characterIds: ["char-cress"],
+                  events: [
+                    { type: "DEATH", entityId: "char-cress", worldTime: 1000, sceneId: "sc-death1" },
+                  ],
+                },
+              ],
+            },
+            {
+              id: "sc-death2",
+              chapterId: "ch-x",
+              order: 2,
+              moments: [
+                {
+                  id: "mom-d2",
+                  sceneId: "sc-death2",
+                  worldTime: 2000,
+                  locationId: "loc-ashvale",
+                  characterIds: [],
+                  events: [
+                    { type: "DEATH", entityId: "char-cress", worldTime: 2000, sceneId: "sc-death2" },
+                  ],
+                },
+              ],
+            },
+            {
+              id: "sc-ghost",
+              chapterId: "ch-x",
+              order: 3,
+              moments: [
+                {
+                  id: "mom-ghost",
+                  sceneId: "sc-ghost",
+                  worldTime: 1500, // after first death (1000) but before second (2000)
+                  locationId: "loc-ironport",
+                  characterIds: ["char-cress"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const issues = checkDeadOrGone(twoDeaths);
+    // Should flag the ghost at t=1500 (it's after the earliest death at t=1000)
+    expect(issues).toHaveLength(1);
+    expect(issues[0]?.momentIds).toContain("mom-ghost");
+  });
+
+  it("produces one issue per post-death appearance, not one per character", () => {
+    const multiGhost: Project = {
+      ...story,
+      chapters: [
+        {
+          id: "ch-x",
+          projectId: story.id,
+          order: 1,
+          scenes: [
+            {
+              id: "sc-death",
+              chapterId: "ch-x",
+              order: 1,
+              moments: [
+                {
+                  id: "mom-death",
+                  sceneId: "sc-death",
+                  worldTime: 1000,
+                  locationId: "loc-ashvale",
+                  characterIds: ["char-cress"],
+                  events: [
+                    { type: "DEATH", entityId: "char-cress", worldTime: 1000, sceneId: "sc-death" },
+                  ],
+                },
+              ],
+            },
+            {
+              id: "sc-ghost1",
+              chapterId: "ch-x",
+              order: 2,
+              moments: [
+                {
+                  id: "mom-ghost1",
+                  sceneId: "sc-ghost1",
+                  worldTime: 2000,
+                  locationId: "loc-ironport",
+                  characterIds: ["char-cress"],
+                },
+              ],
+            },
+            {
+              id: "sc-ghost2",
+              chapterId: "ch-x",
+              order: 3,
+              moments: [
+                {
+                  id: "mom-ghost2",
+                  sceneId: "sc-ghost2",
+                  worldTime: 3000,
+                  locationId: "loc-omel",
+                  characterIds: ["char-cress"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const issues = checkDeadOrGone(multiGhost);
+    expect(issues).toHaveLength(2);
+    const ghostMoments = issues.map((i) => i.momentIds.at(-1));
+    expect(ghostMoments).toContain("mom-ghost1");
+    expect(ghostMoments).toContain("mom-ghost2");
+  });
+
+  it("reports issues for multiple dead characters independently", () => {
+    const twoDeadChars: Project = {
+      ...story,
+      chapters: [
+        {
+          id: "ch-x",
+          projectId: story.id,
+          order: 1,
+          scenes: [
+            {
+              id: "sc-deaths",
+              chapterId: "ch-x",
+              order: 1,
+              moments: [
+                {
+                  id: "mom-deaths",
+                  sceneId: "sc-deaths",
+                  worldTime: 1000,
+                  locationId: "loc-ashvale",
+                  characterIds: [],
+                  events: [
+                    { type: "DEATH", entityId: "char-lyra", worldTime: 1000, sceneId: "sc-deaths" },
+                    { type: "DEATH", entityId: "char-daron", worldTime: 1000, sceneId: "sc-deaths" },
+                  ],
+                },
+              ],
+            },
+            {
+              id: "sc-ghosts",
+              chapterId: "ch-x",
+              order: 2,
+              moments: [
+                {
+                  id: "mom-lyra-ghost",
+                  sceneId: "sc-ghosts",
+                  worldTime: 2000,
+                  locationId: "loc-ironport",
+                  characterIds: ["char-lyra"],
+                },
+                {
+                  id: "mom-daron-ghost",
+                  sceneId: "sc-ghosts",
+                  worldTime: 2000,
+                  locationId: "loc-ironport",
+                  characterIds: ["char-daron"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const issues = checkDeadOrGone(twoDeadChars);
+    expect(issues).toHaveLength(2);
+    const chars = new Set(issues.map((i) => i.characterId));
+    expect(chars).toContain("char-lyra");
+    expect(chars).toContain("char-daron");
+  });
+
+  it("returns no issues for empty project", () => {
+    expect(checkDeadOrGone({ ...story, chapters: [] })).toHaveLength(0);
+  });
 });
